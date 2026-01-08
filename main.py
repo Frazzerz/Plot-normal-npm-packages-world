@@ -4,6 +4,32 @@ import pandas as pd
 from data_processor import load_package_list, load_all_data, get_numeric_metrics, calculate_averages, create_metric_csv
 from config import OUTPUT_DIR, CSV_OUTPUT_DIR, AVERAGES_FILE, FIGURE_SIZE, DPI, MAX_VERSIONS
 
+def check_existing_plots(metrics: list[str], output_dir: str) -> list[str]:
+    """Check which metrics already have plots generated"""
+    existing_plots = []
+    
+    for metric in metrics:
+        safe_metric_name = metric.replace('.', '_').replace('/', '_')
+        all_packages_file = os.path.join(output_dir, f"{safe_metric_name}_all_packages.png")
+        average_file = os.path.join(output_dir, f"{safe_metric_name}_average.png")
+        
+        if os.path.exists(all_packages_file) and os.path.exists(average_file):
+            existing_plots.append(metric)
+    
+    return existing_plots
+
+def check_existing_csvs(metrics: list[str], csv_dir: str) -> list[str]:
+    """Check which metrics already have CSV files generated"""
+    existing_csvs = []
+    
+    for metric in metrics:
+        safe_metric_name = metric.replace('.', '_').replace('/', '_')
+        csv_file = os.path.join(csv_dir, f"{safe_metric_name}.csv")
+        
+        if os.path.exists(csv_file):
+            existing_csvs.append(metric)
+    
+    return existing_csvs
 def plot_metric_all_packages(data_dict: dict, metric: str, output_dir: str) -> None:
     """Create a graph with a line for each package"""
 
@@ -34,7 +60,7 @@ def plot_metric_all_packages(data_dict: dict, metric: str, output_dir: str) -> N
     plt.ylabel(metric, fontsize=12)
     plt.title(f'{metric} - All Packages', fontsize=14, fontweight='bold')
     plt.xticks(x_values, x_labels, rotation=45)
-    plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8)
+    # plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left', fontsize=8)
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     
@@ -76,7 +102,7 @@ def plot_metric_average(df_averages: pd.DataFrame, metric: str, output_dir: str)
     plt.title(f'{metric} - Average across all packages', fontsize=14, fontweight='bold')
     plt.xticks(x_values, x_labels, rotation=45)
     plt.grid(True, alpha=0.3)
-    plt.legend(fontsize=10)
+    # plt.legend(fontsize=10)
     plt.tight_layout()
     
     # Salva il grafico
@@ -88,7 +114,7 @@ def plot_metric_average(df_averages: pd.DataFrame, metric: str, output_dir: str)
 def main():
     print("Package plotting started...")
     
-    # Create output directories
+    # Create output directories if they don't exist
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     os.makedirs(CSV_OUTPUT_DIR, exist_ok=True)
     
@@ -118,27 +144,46 @@ def main():
     #for pkg_name, df in list(data_dict.items())[:1]:
         #print(f"   {pkg_name}: {list(df[test_metric].head(3))}")
     
-    print("Calculating averages for all packages...")
-    df_averages = calculate_averages(data_dict, metrics)
-    df_averages.to_csv(AVERAGES_FILE)
-    print("Total averages saved successfully.")
+    # Check if averages file already exists
+    if os.path.exists(AVERAGES_FILE):
+        print(f"Loading existing averages file: {AVERAGES_FILE}")
+        df_averages = pd.read_csv(AVERAGES_FILE, index_col=0)
+        print("Averages loaded from existing file.")
+    else:
+        print("Calculating averages for all packages...")
+        df_averages = calculate_averages(data_dict, metrics)
+        df_averages.to_csv(AVERAGES_FILE)
+        print("Total averages saved successfully.")
     
-    print("Creating CSV for each metric...")
-    for i, metric in enumerate(metrics, 1):
-        safe_metric_name = metric.replace('.', '_').replace('/', '_')
-        csv_filename = f"{safe_metric_name}.csv"
-        csv_path = os.path.join(CSV_OUTPUT_DIR, csv_filename)
-        create_metric_csv(data_dict, metric, csv_path)
-    print(f"Created {len(metrics)} CSV files for metrics")
+    # Check which CSVs already exist
+    existing_csvs = check_existing_csvs(metrics, CSV_OUTPUT_DIR)
+    csv_to_create = [m for m in metrics if m not in existing_csvs]
     
-    print(f"Generating plots for {len(metrics)} metrics...")
-    for i, metric in enumerate(metrics, 1):
-        print(f"   [{i}/{len(metrics)}] Processing: {metric}")
-        # Plot with all packages
-        plot_metric_all_packages(data_dict, metric, OUTPUT_DIR)        
-        # Plot with average
-        plot_metric_average(df_averages, metric, OUTPUT_DIR)
+    if csv_to_create:
+        print(f"Creating CSV for {len(csv_to_create)} metrics...")
+        for i, metric in enumerate(csv_to_create, 1):
+            safe_metric_name = metric.replace('.', '_').replace('/', '_')
+            csv_filename = f"{safe_metric_name}.csv"
+            csv_path = os.path.join(CSV_OUTPUT_DIR, csv_filename)
+            create_metric_csv(data_dict, metric, csv_path)
+            print(f"   [{i}/{len(csv_to_create)}] Created: {metric}")
+    else:
+        print(f"All {len(metrics)} CSV files already exist, skipping creation.")
     
+    # Check which plots already exist
+    existing_plots = check_existing_plots(metrics, OUTPUT_DIR)
+    plots_to_create = [m for m in metrics if m not in existing_plots]
+    
+    if plots_to_create:
+        print(f"Generating plots for {len(plots_to_create)} metrics...")
+        for i, metric in enumerate(plots_to_create, 1):
+            print(f"   [{i}/{len(plots_to_create)}] Processing: {metric}")
+            # Plot with all packages
+            plot_metric_all_packages(data_dict, metric, OUTPUT_DIR)        
+            # Plot with average
+            plot_metric_average(df_averages, metric, OUTPUT_DIR)
+    else:
+        print(f"All {len(metrics)} plots already exist, skipping creation.")
     print("Analysis and plotting completed successfully.")
 
 if __name__ == "__main__":

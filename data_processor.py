@@ -13,7 +13,7 @@ def load_csv_data(pkg_name: str) -> pd.DataFrame | None:
     
     csv_path = os.path.join(ANALYSIS_DIR, pkg_name, CSV_FILENAME)
     if not os.path.exists(csv_path):
-        print(f"File not found for {pkg_name}: {csv_path}")
+        #print(f"File not found for {pkg_name}: {csv_path}")
         return None
     
     try:
