@@ -10,14 +10,13 @@ from config import (
     MAX_VERSIONS, 
     AVG_PLOTS_DIR, 
     ALL_PKGS_PLOTS_DIR,
-    PLOT_OUTPUT_DIR,
     OTH_FILE_DIR_PRE,
     PLOTS_PRES_DIR,
     OTH_FILE_DIR_AVG_PRES,
     PLOTS_PRES_AVG_DIR
 )
 
-def plot_csv_metrics(csv_path, output_dir, title_suffix=""):
+def plot_csv_metrics(csv_path, output_dir, part, title=""):
     print(f"Generating plots for {csv_path}")
 
     if not os.path.exists(csv_path):
@@ -54,15 +53,21 @@ def plot_csv_metrics(csv_path, output_dir, title_suffix=""):
             markersize=8
         )
 
+        # for better visualization
+        only_metric_name = (metric_name.split("_", 1)[1]).replace("_", " ")
+        parts = metric_name.split("_")
+        parts[0] = part
+        title_metric_name = " ".join(parts)
+
         plt.xlabel("Version")
-        plt.ylabel(metric_name)
-        plt.title(f"{metric_name} {title_suffix}".strip())
+        plt.ylabel(title_metric_name)
+        plt.title(f"{title} - {only_metric_name}")
         plt.xticks(x_values, x_labels, rotation=45)
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
 
-        safe_name = metric_name.replace('.', '_').replace('/', '_')
-        out_file = os.path.join(output_dir, f"{safe_name}.png")
+        file_name = "_".join(parts)
+        out_file = os.path.join(output_dir, f"{file_name}.png")
         plt.savefig(out_file, dpi=DPI, bbox_inches="tight")
         plt.close()
 
@@ -119,15 +124,14 @@ def plot_all_packages_per_metric():
         #print(f"Saved plot: {save_path}")
 
 def main():
-    print(f"Generate all plots in {PLOT_OUTPUT_DIR}")
-    plot_csv_metrics(OTH_FILE_DIR_AVG, AVG_PLOTS_DIR, title_suffix="- Average across all 496 packages")
+    plot_csv_metrics(OTH_FILE_DIR_AVG, AVG_PLOTS_DIR, "avg", title="avg value across all 496 packages")
     print("Done.")
-    plot_csv_metrics(OTH_FILE_DIR_PRE, PLOTS_PRES_DIR, title_suffix="- Presence across all 496 packages")
+    plot_csv_metrics(OTH_FILE_DIR_PRE, PLOTS_PRES_DIR, "number of", title="number of package that have at least one occurrence across all 496 packages")
     print("Done.")
-    plot_csv_metrics(OTH_FILE_DIR_AVG_PRES, PLOTS_PRES_AVG_DIR, title_suffix="- Average presence across the non-0 packages")
+    plot_csv_metrics(OTH_FILE_DIR_AVG_PRES, PLOTS_PRES_AVG_DIR, "avg", title="avg value for the number of package that have at least one occurrence")
     print("Done.")
-    plot_all_packages_per_metric()
-    print("Done.")
+    #plot_all_packages_per_metric()
+    #print("Done.")
 
 if __name__ == "__main__":
     main()

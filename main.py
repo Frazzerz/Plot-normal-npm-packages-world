@@ -10,7 +10,8 @@ from config import (
     OTH_FILE_DIR_AVG,
     OTH_FILE_DIR_PRE,
     OTH_FILE_DIR_AVG_PRES,
-    PLOT_OUTPUT_DIR
+    PLOT_OUTPUT_DIR,
+    COLUMNS_NUMERIC
 )
 import pandas as pd
 import os
@@ -146,7 +147,7 @@ def main():
     os.makedirs(OUTPUT_DIR_OTH_CSV, exist_ok=True)
     init_total(OTH_FILE_DIR_AVG)
     
-    for col in COLUMNS_TO_EXTRACT:
+    for col in COLUMNS_NUMERIC:     # COLUMNS_TO_EXTRACT
         filename = col.replace('.', '_') + '.csv'
         filepath = os.path.join(OUTPUT_DIR_AGG, filename)
         if os.path.exists(filepath):
