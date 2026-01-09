@@ -1,8 +1,7 @@
 __pycache__/
 analysys_results/
-deobfuscated_files/
 list_pkg.json
 list_pkg1.json
-log.txt
-output/
-csv/
+aggregate_outputs_csv/
+prove/
+plots/
