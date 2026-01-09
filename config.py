@@ -1,18 +1,19 @@
 import os
 
-# Path
 JSON_FILE = "list_pkg.json"
 ANALYSIS_DIR = "analysys_results"
 CSV_FILENAME = "aggregate_metrics_by_single_version.csv"
-
 OUTPUT_DIR_AGG = "aggregate_outputs_csv"
+OUTPUT_DIR_OTH_CSV = "others_csv"
+OTH_FILE_DIR_AVG = os.path.join(OUTPUT_DIR_OTH_CSV, "avgs_for_all_pkgs_numeric_metrics.csv")
+
+# Plot settings
 PLOT_OUTPUT_DIR = "plots"
 AVG_PLOTS_DIR = os.path.join(PLOT_OUTPUT_DIR, "numerical_averages")
 ALL_PKGS_PLOTS_DIR = os.path.join(PLOT_OUTPUT_DIR, "all_packages")
-OUTPUT_DIR_OTH_CSV = "others_csv"
-OTH_FILE_DIR_AVG = os.path.join(OUTPUT_DIR_OTH_CSV, "avgs_total_metrics_for_all_pkgs.csv")
+PLOTS_PRES_DIR = os.path.join(PLOT_OUTPUT_DIR, "presence")
+PLOTS_PRES_AVG_DIR = os.path.join(PLOT_OUTPUT_DIR, "presence_averages")
 
-# Plot settings
 MAX_VERSIONS = 20
 FIGURE_SIZE = (12, 6)
 DPI = 100
@@ -39,10 +40,8 @@ COLUMNS_TO_EXTRACT = [
     "crypto.hook_provider"                  # 0 value always
 ]
 
-OTH_FILE_DIR_PRE = os.path.join(OUTPUT_DIR_OTH_CSV, "presence_total_metrics_for_all_pkgs.csv")
-OTH_FILE_DIR_AVG_PRES = os.path.join(OUTPUT_DIR_OTH_CSV, "presence_avg_total_metrics_for_all_pkgs.csv")
-PLOTS_PRES_DIR = os.path.join(PLOT_OUTPUT_DIR, "presence")
-PLOTS_PRES_AVG_DIR = os.path.join(PLOT_OUTPUT_DIR, "presence_averages")
+OTH_FILE_DIR_PRE = os.path.join(OUTPUT_DIR_OTH_CSV, "numbers_of_pkg_rule_metrics_greater_than_0.csv")
+OTH_FILE_DIR_AVG_PRES = os.path.join(OUTPUT_DIR_OTH_CSV, "avgs_in_this_pkg_rule_metrics_greater_than_0.csv")
 
 COLUMNS_PRESENCE = [
     "crypto.crypto_addresses",

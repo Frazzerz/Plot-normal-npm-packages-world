@@ -110,9 +110,11 @@ def plot_all_packages_per_metric():
             if any(v is not None for v in values):
                 plt.plot(x_values, values, marker='o', label=pkg_name, alpha=0.7, linewidth=2)
         
+        # for better visualization
+        only_metric_name = (col.split(".", 1)[1]).replace("_", " ")
         plt.xlabel('Version', fontsize=12)
-        plt.ylabel(col, fontsize=12)
-        plt.title(f'{col} - All Packages', fontsize=14, fontweight='bold')
+        plt.ylabel(only_metric_name, fontsize=12)
+        plt.title(f'All Packages displayed together for metric {only_metric_name}', fontsize=14, fontweight='bold')
         plt.xticks(x_values, x_labels, rotation=45)
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
@@ -130,8 +132,8 @@ def main():
     print("Done.")
     plot_csv_metrics(OTH_FILE_DIR_AVG_PRES, PLOTS_PRES_AVG_DIR, "avg", title="avg value for the number of package that have at least one occurrence")
     print("Done.")
-    #plot_all_packages_per_metric()
-    #print("Done.")
+    plot_all_packages_per_metric()
+    print("Done.")
 
 if __name__ == "__main__":
     main()
