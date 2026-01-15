@@ -10,7 +10,7 @@ OTH_FILE_DIR_AVG = os.path.join(OUTPUT_DIR_OTH_CSV, "avgs_for_all_pkgs_numeric_m
 # Plot settings
 PLOT_OUTPUT_DIR = "plots"
 AVG_PLOTS_DIR = os.path.join(PLOT_OUTPUT_DIR, "numerical_averages")
-ALL_PKGS_PLOTS_DIR = os.path.join(PLOT_OUTPUT_DIR, "all_packages")
+HTML_PLOTS_DIR = os.path.join(PLOT_OUTPUT_DIR, "html_plots")
 PLOTS_PRES_DIR = os.path.join(PLOT_OUTPUT_DIR, "presence")
 PLOTS_PRES_AVG_DIR = os.path.join(PLOT_OUTPUT_DIR, "presence_averages")
 
@@ -68,3 +68,5 @@ COLUMNS_NUMERIC = [
     "generic.weighted_avg_shannon_entropy",
     "generic.longest_line_length",
 ]
+
+OUTPUT_DIR_AGG_NO_OUT = "aggregateNoOutliers_csv"
