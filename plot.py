@@ -6,6 +6,7 @@ from plotly.subplots import make_subplots
 import shutil
 from pathlib import Path
 from config import (
+    COLUMNS_PRESENCE,
     OTH_FILE_DIR_AVG, 
     OUTPUT_DIR_AGG, 
     COLUMNS_TO_EXTRACT, 
@@ -14,10 +15,7 @@ from config import (
     MAX_VERSIONS, 
     AVG_PLOTS_DIR, 
     HTML_PLOTS_DIR,
-    OTH_FILE_DIR_PRE,
-    PLOTS_PRES_DIR,
-    OTH_FILE_DIR_AVG_PRES,
-    PLOTS_PRES_AVG_DIR,
+    OUTPUT_DIR_AGG_GT0,
     PLOT_OUTPUT_DIR,
     COLUMNS_NUMERIC,
     OUTPUT_DIR_AGG_NO_OUT
@@ -67,7 +65,6 @@ def plot_csv_metrics(csv_path, output_dir, part, title=""):
             markersize=8
         )
 
-        # for better visualization
         only_metric_name = (metric_name.split("_", 1)[1]).replace("_", " ")
         parts = metric_name.split("_")
         parts[0] = part
@@ -95,8 +92,6 @@ def plot_interactive_all_packages(dir, output_dir):
 
     for col in COLUMNS_TO_EXTRACT:
         filepath = os.path.join(dir, col.replace('.', '_') + '.csv')
-        #filepath = os.path.join(OUTPUT_DIR_AGG, col.replace('.', '_') + '.csv')
-        #filepath = os.path.join(OUTPUT_DIR_AGG_NO_OUT, col.replace('.', '_') + '.csv')
         if not os.path.exists(filepath):
             continue
 
@@ -137,19 +132,33 @@ def plot_interactive_all_packages(dir, output_dir):
 def plot_boxplot_metric(metric_csv_path, output_dir):
     df = pd.read_csv(metric_csv_path)
     version_cols = [c for c in df.columns if c.startswith("version_")]
-
     data = [df[c].dropna().values for c in version_cols]
 
     plt.figure(figsize=(14, 6))
-    plt.boxplot(
+    box = plt.boxplot(
         data,
         tick_labels=[f"V{i+1}" for i in range(len(version_cols))],
-        showfliers=True
+        showfliers=True,
+        patch_artist=True,
+        medianprops=dict(color="red", linewidth=1.5),
+        boxprops=dict(facecolor="lightgray"),
+        whiskerprops=dict(color="black"),
+        capprops=dict(color="black"),
+        flierprops=dict(marker='o', markersize=4, alpha=0.6)
     )
+
+    for b in box["boxes"]:
+        b.set_facecolor("#cfe8f3")
+        b.set_edgecolor("#2c3e50")
+
     plt.xticks(rotation=45)
-    plt.title(os.path.basename(metric_csv_path).replace(".csv", ""))
-    plt.xlabel("Version")
-    plt.ylabel("Value")
+    metric_name = os.path.basename(metric_csv_path).replace(".csv", "")
+    metric_name = (metric_name.split("_", 1)[1]).replace("_", " ")
+    plt.title(metric_name, fontsize=14, fontweight="bold")
+    plt.xlabel("Version", fontsize=11)
+    plt.ylabel("Value", fontsize=11)
+
+    plt.grid(axis="y", alpha=0.3)
     plt.tight_layout()
 
     out = os.path.join(output_dir, os.path.basename(metric_csv_path).replace(".csv", "_box.png"))
@@ -159,20 +168,28 @@ def plot_boxplot_metric(metric_csv_path, output_dir):
 
 def main():
     delete_dir()
-    plot_csv_metrics(OTH_FILE_DIR_AVG, AVG_PLOTS_DIR, "avg", title="avg value across all 495 packages")
-    plot_csv_metrics(OTH_FILE_DIR_PRE, PLOTS_PRES_DIR, "number of", title="number of package that have at least one occurrence across all 495 packages")
-    plot_csv_metrics(OTH_FILE_DIR_AVG_PRES, PLOTS_PRES_AVG_DIR, "avg", title="avg value for the number of package that have at least one occurrence")
+    plot_csv_metrics(OTH_FILE_DIR_AVG, AVG_PLOTS_DIR, "avg", title="avg value across all packages (excluding outliers)")
     plot_interactive_all_packages(OUTPUT_DIR_AGG, Path("all_packages"))
     plot_interactive_all_packages(OUTPUT_DIR_AGG_NO_OUT, Path("all_packages_no_outliers"))
 
-
     BOX_DIR = os.path.join(PLOT_OUTPUT_DIR, "boxplots")
-    os.makedirs(BOX_DIR, exist_ok=True)
-    print("Generating boxplots for each metric...")
-    for col in COLUMNS_NUMERIC:  #COLUMNS_TO_EXTRACT:
+    BOX_DIR_NUMERIC = os.path.join(BOX_DIR, "numeric")
+    BOX_DIR_GT0 = os.path.join(BOX_DIR, "greater_than_0")
+    os.makedirs(BOX_DIR_NUMERIC, exist_ok=True)
+    os.makedirs(BOX_DIR_GT0, exist_ok=True)
+
+    print("Generating boxplots for numeric metrics...")
+    for col in COLUMNS_NUMERIC:
         filepath = os.path.join(OUTPUT_DIR_AGG, col.replace('.', '_') + '.csv')
         if os.path.exists(filepath):
-            plot_boxplot_metric(filepath, BOX_DIR)
+            plot_boxplot_metric(filepath, BOX_DIR_NUMERIC)
+
+    print("Generating boxplots for metrics greater than 0...")
+    for col in COLUMNS_PRESENCE:
+        filepath = os.path.join(OUTPUT_DIR_AGG_GT0, col.replace('.', '_') + '.csv')
+        if os.path.exists(filepath):
+            plot_boxplot_metric(filepath, BOX_DIR_GT0)
+
     print(f"Boxplots saved in {BOX_DIR}")
     
 

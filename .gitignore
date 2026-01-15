@@ -1,10 +1,6 @@
 __pycache__/
 analysys_results/
 list_pkg.json
-list_pkg1.json
-aggregate_outputs_csv/
-prove/
-plots/
-others_csv/
-aggregateNoOutliers_csv/
 csvs/
+plots/
+note.txt
