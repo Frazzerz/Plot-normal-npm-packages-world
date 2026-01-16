@@ -72,15 +72,17 @@ def append_package_to_column_files(pkg_name, df):
                 csv.writer(f).writerow(row)
 
 # ------
-def save_no_outliers_version(metric_csv_path, output_dir):
+def save_no_outliers_version(metric_csv_path):
+    '''Obtain averages that are more representative of "typical" packet behavior, 
+    preventing a few extreme values from distorting the results'''
     df = pd.read_csv(metric_csv_path)
     version_cols = [c for c in df.columns if c.startswith("version_")]
 
     df_versions = df[version_cols]
 
-    Q1 = df_versions.quantile(0.25)
-    Q3 = df_versions.quantile(0.75)
-    IQR = Q3 - Q1
+    Q1 = df_versions.quantile(0.25)  # 25th percentile
+    Q3 = df_versions.quantile(0.75)  # 75th percentile
+    IQR = Q3 - Q1       # Interquartile Range, to remove outliers
 
     low = Q1 - 1.5 * IQR
     high = Q3 + 1.5 * IQR
@@ -160,7 +162,7 @@ def main():
         filename = col.replace('.', '_') + '.csv'
         filepath = os.path.join(OUTPUT_DIR_AGG, filename)
         if os.path.exists(filepath):
-            df_clean = save_no_outliers_version(filepath, OUTPUT_DIR_AGG_NO_OUT)
+            df_clean = save_no_outliers_version(filepath)
             out_path = os.path.join(OUTPUT_DIR_AGG_NO_OUT, filename)
             df_clean.to_csv(out_path, index=False)
     print(f"Aggregate CSV files created in {OUTPUT_DIR_AGG} and {OUTPUT_DIR_AGG_NO_OUT}.")
