@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import shutil
 from pathlib import Path
+from matplotlib.ticker import MaxNLocator
 from config import (
     COLUMNS_PRESENCE,
     OTH_FILE_DIR_AVG, 
@@ -159,6 +160,8 @@ def plot_boxplot_metric(metric_csv_path, output_dir):
     plt.ylabel("Value", fontsize=11)
 
     plt.grid(axis="y", alpha=0.3)
+
+    plt.gca().yaxis.set_major_locator(MaxNLocator(integer=True))
     plt.tight_layout()
 
     out = os.path.join(output_dir, os.path.basename(metric_csv_path).replace(".csv", "_box.png"))
